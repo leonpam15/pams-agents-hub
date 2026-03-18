@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pam's Team — Agent Hub v4</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0b0b0e;
+    --surface: #131318;
+    --surface2: #1a1a22;
+    --surface3: #22222c;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #eceae4;
+    --muted: #7e7c78;
+    --muted2: #4a4845;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --serif: 'Playfair Display', serif;
+    --r-xl: 22px;
+    --lola: #c084fc; --lola-dim: rgba(192,132,252,0.1);
+    --nova: #34d399; --nova-dim: rgba(52,211,153,0.1);
+    --apex: #60a5fa; --apex-dim: rgba(96,165,250,0.1);
+    --aria: #fb7185; --aria-dim: rgba(251,113,133,0.1);
+    --eros: #fbbf24; --eros-dim: rgba(251,191,36,0.1);
+    --kuno: #f97316; --kuno-dim: rgba(249,115,22,0.1);
+  }
+
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.013) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.013) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 20px; border-bottom: 1px solid var(--border);
+    background: rgba(11,11,14,0.94); backdrop-filter: blur(12px);
+    flex-wrap: wrap;
+  }
+  .topbar-brand { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; color: var(--muted); white-space: nowrap; }
+  .topbar-brand span { color: var(--lola); }
+  .vdiv { width: 1px; height: 16px; background: var(--border2); flex-shrink: 0; }
+  .topbar-label { font-family: var(--mono); font-size: 9px; color: var(--muted2); letter-spacing: 0.1em; white-space: nowrap; }
+  .key-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted2); transition: all 0.4s; flex-shrink: 0; }
+  .key-dot.active { background: var(--nova); box-shadow: 0 0 8px rgba(52,211,153,0.5); }
+  .key-input {
+    flex: 1; min-width: 140px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 7px; padding: 6px 11px; font-family: var(--mono); font-size: 11px;
+    color: var(--text); outline: none; transition: border-color 0.2s;
+  }
+  .key-input:focus { border-color: rgba(192,132,252,0.4); }
+  .key-input::placeholder { color: var(--muted2); }
+  .activate-btn {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.07em;
+    padding: 6px 14px; background: transparent; border: 1px solid var(--border2);
+    border-radius: 7px; color: var(--muted); cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .activate-btn:hover { border-color: var(--lola); color: var(--lola); }
+  .activate-btn.live { border-color: var(--nova); color: var(--nova); background: var(--nova-dim); }
+  /* ElevenLabs key row */
+  .el-label { font-family: var(--mono); font-size: 9px; color: var(--muted2); letter-spacing: 0.1em; white-space: nowrap; }
+  .el-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted2); transition: all 0.4s; flex-shrink: 0; }
+  .el-dot.active { background: var(--eros); box-shadow: 0 0 8px rgba(251,191,36,0.5); }
+
+  /* MAIN */
+  .main { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; padding: 48px 20px 44px; }
+  .hero-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--muted2); margin-bottom: 14px; }
+  .hero-title { font-family: var(--serif); font-size: clamp(32px, 5vw, 54px); font-weight: 400; text-align: center; line-height: 1.08; margin-bottom: 10px; }
+  .hero-title em { font-style: italic; color: var(--lola); }
+  .hero-meta { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 48px; display: flex; align-items: center; gap: 10px; }
+  .hero-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--muted2); }
+
+  /* GRID */
+  .agent-grid-top { display: grid; grid-template-columns: repeat(3,1fr); gap: 13px; width: 100%; max-width: 960px; margin-bottom: 13px; }
+  .agent-grid-bot { display: grid; grid-template-columns: repeat(2,1fr); gap: 13px; width: 100%; max-width: 638px; margin-bottom: 34px; }
+
+  .agent-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl);
+    padding: 24px 20px 20px; cursor: pointer; transition: transform 0.22s, border-color 0.22s, background 0.22s;
+    position: relative; overflow: hidden;
+  }
+  .agent-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--card-color, transparent); opacity: 0; transition: opacity 0.3s; }
+  .agent-card:hover { transform: translateY(-3px); border-color: var(--border2); background: var(--surface2); }
+  .agent-card.active { border-color: var(--card-color); background: var(--surface2); }
+  .agent-card.active::after { opacity: 1; }
+  .agent-card[data-agent="lola"] { --card-color: var(--lola); --card-dim: var(--lola-dim); }
+  .agent-card[data-agent="nova"] { --card-color: var(--nova); --card-dim: var(--nova-dim); }
+  .agent-card[data-agent="apex"] { --card-color: var(--apex); --card-dim: var(--apex-dim); }
+  .agent-card[data-agent="aria"] { --card-color: var(--aria); --card-dim: var(--aria-dim); }
+  .agent-card[data-agent="eros"] { --card-color: var(--eros); --card-dim: var(--eros-dim); }
+  .agent-card[data-agent="kuno"] { --card-color: var(--kuno); --card-dim: var(--kuno-dim); }
+
+  .agent-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .agent-avatar { width: 44px; height: 44px; border-radius: 12px; background: var(--card-dim); border: 1px solid var(--card-color); display: flex; align-items: center; justify-content: center; font-size: 19px; transition: background 0.3s; }
+  .agent-card.active .agent-avatar { background: var(--card-color); }
+
+  /* Robot portrait */
+  .robot-portrait {
+    width: 100%; height: 140px;
+    border-radius: 14px;
+    background: var(--card-dim);
+    border: 1px solid var(--card-color);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .robot-portrait svg { width: 110px; height: 120px; }
+  .agent-card:hover .robot-portrait,
+  .agent-card.active .robot-portrait { background: color-mix(in srgb, var(--card-color) 20%, transparent); }
+
+  /* ── Robot idle animations ── */
+  @media (prefers-reduced-motion: no-preference) {
+    /* Gentle float for all robots */
+    .robot-portrait svg { animation: robotFloat 3.5s ease-in-out infinite; }
+    @keyframes robotFloat {
+      0%,100% { transform: translateY(0px); }
+      50%      { transform: translateY(-5px); }
+    }
+    /* Eye blink — targets eye ellipses/rects with class .r-eye */
+    .r-eye { animation: eyeBlink 4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+    .r-eye-r { animation: eyeBlink 4s ease-in-out infinite 0.08s; transform-origin: center; transform-box: fill-box; }
+    @keyframes eyeBlink {
+      0%,92%,100% { transform: scaleY(1); }
+      95%          { transform: scaleY(0.08); }
+    }
+    /* Antenna pulse glow */
+    .r-antenna { animation: antennaPulse 2.2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+    @keyframes antennaPulse {
+      0%,100% { opacity: 0.9; }
+      50%      { opacity: 0.4; }
+    }
+    /* Chest glow breathe */
+    .r-chest { animation: chestBreathe 2.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+    @keyframes chestBreathe {
+      0%,100% { opacity: 0.8; }
+      50%      { opacity: 0.3; }
+    }
+    /* Kuno signal arcs sweep */
+    .r-signal { animation: signalSweep 1.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+    .r-signal-2 { animation: signalSweep 1.8s ease-in-out infinite 0.3s; transform-origin: center; transform-box: fill-box; }
+    .r-signal-3 { animation: signalSweep 1.8s ease-in-out infinite 0.6s; transform-origin: center; transform-box: fill-box; }
+    @keyframes signalSweep {
+      0%,100% { opacity: 0.9; }
+      50%      { opacity: 0.15; }
+    }
+    /* Nova scan line sweep */
+    .r-scan { animation: scanMove 2s linear infinite; }
+    @keyframes scanMove {
+      0%   { transform: translateX(-8px); opacity: 0; }
+      20%  { opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateX(8px); opacity: 0; }
+    }
+    /* Apex hex eye pulse */
+    .r-hex { animation: hexPulse 2.5s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+    @keyframes hexPulse {
+      0%,100% { opacity: 0.85; }
+      50%      { opacity: 0.5; }
+    }
+    /* Eros scales sway */
+    .r-scale-l { animation: scaleSwayL 3s ease-in-out infinite; transform-origin: 55px 86px; transform-box: fill-box; }
+    .r-scale-r { animation: scaleSwayR 3s ease-in-out infinite; transform-origin: 55px 86px; transform-box: fill-box; }
+    @keyframes scaleSwayL {
+      0%,100% { transform: rotate(0deg); }
+      50%      { transform: rotate(-4deg); }
+    }
+    @keyframes scaleSwayR {
+      0%,100% { transform: rotate(0deg); }
+      50%      { transform: rotate(4deg); }
+    }
+  }
+  .agent-status-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .agent-status { width: 7px; height: 7px; border-radius: 50%; background: var(--muted2); transition: all 0.3s; }
+  .agent-card.active .agent-status { background: var(--card-color); box-shadow: 0 0 7px var(--card-color); }
+  .agent-num { font-family: var(--mono); font-size: 9px; color: var(--muted2); }
+  .agent-name { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+  .agent-role { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--card-color); margin-bottom: 11px; opacity: 0.8; }
+  .agent-voice { font-size: 11px; font-style: italic; color: var(--card-color); opacity: 0.7; margin-bottom: 12px; padding-left: 9px; border-left: 2px solid var(--card-color); line-height: 1.5; }
+  .agent-desc { font-size: 12px; color: var(--muted); line-height: 1.65; margin-bottom: 14px; }
+  .agent-caps { display: flex; flex-wrap: wrap; gap: 5px; }
+  .cap-pill { font-size: 10px; padding: 3px 8px; border-radius: 5px; background: var(--surface3); color: var(--muted); border: 1px solid var(--border); }
+  .mcp-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 9px; font-family: var(--mono); letter-spacing: 0.06em; padding: 3px 8px; border-radius: 5px; background: rgba(52,211,153,0.07); border: 1px solid rgba(52,211,153,0.18); color: var(--nova); margin-top: 7px; }
+  .mcp-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--nova); }
+
+  /* CHAT */
+  .chat-section { width: 100%; max-width: 740px; display: none; flex-direction: column; animation: slideUp 0.28s ease; }
+  .chat-section.visible { display: flex; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+  .chat-header {
+    background: var(--surface); border: 1px solid var(--border); border-bottom: none;
+    border-radius: var(--r-xl) var(--r-xl) 0 0; padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .chat-header-avatar { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .chat-header-info { flex: 1; }
+  .chat-header-name { font-size: 14px; font-weight: 600; }
+  .chat-header-role { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; opacity: 0.6; margin-top: 1px; }
+  .chat-header-voice { font-size: 11px; font-style: italic; color: var(--muted); max-width: 240px; text-align: right; line-height: 1.4; }
+  .chat-close { background: none; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); font-size: 15px; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+  .chat-close:hover { border-color: var(--border2); color: var(--text); }
+
+  .chat-messages {
+    background: var(--surface); border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+    padding: 16px 20px; min-height: 280px; max-height: 380px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth;
+  }
+  .chat-messages::-webkit-scrollbar { width: 3px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 2px; }
+
+  .msg { display: flex; gap: 8px; animation: msgIn 0.22s ease; }
+  @keyframes msgIn { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar { width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; background: var(--surface3); }
+  .msg-inner { max-width: 82%; }
+  .msg-bubble { padding: 9px 12px; border-radius: 12px; font-size: 13px; line-height: 1.62; border: 1px solid var(--border); }
+  /* Agent bubble — colored left border + tinted bg */
+  .msg.agent .msg-bubble {
+    background: color-mix(in srgb, var(--active-color, var(--lola)) 7%, var(--surface2));
+    border-color: color-mix(in srgb, var(--active-color, var(--lola)) 30%, transparent);
+    border-radius: 4px 12px 12px 12px;
+  }
+  /* User bubble — right-aligned, subtle agent tint */
+  .msg.user .msg-bubble {
+    background: color-mix(in srgb, var(--active-color, var(--lola)) 12%, var(--surface3));
+    border-color: color-mix(in srgb, var(--active-color, var(--lola)) 20%, transparent);
+    border-radius: 12px 4px 12px 12px;
+  }
+  .msg-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+  .msg-meta { font-size: 10px; color: var(--muted2); font-family: var(--mono); }
+  .msg.user .msg-footer { flex-direction: row-reverse; }
+
+  /* SPEAK BUTTON */
+  .speak-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-family: var(--mono); letter-spacing: 0.06em;
+    padding: 3px 8px; border-radius: 5px; cursor: pointer;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted2); transition: all 0.18s;
+  }
+  .speak-btn:hover { border-color: var(--active-color, var(--lola)); color: var(--active-color, var(--lola)); }
+  .speak-btn.playing { border-color: var(--active-color, var(--lola)); color: var(--active-color, var(--lola)); background: var(--active-dim, rgba(192,132,252,0.08)); }
+  .speak-btn svg { width: 10px; height: 10px; fill: currentColor; }
+
+  /* sound wave animation */
+  .sound-wave { display: none; align-items: center; gap: 2px; height: 12px; }
+  .speak-btn.playing .sound-wave { display: flex; }
+  .speak-btn.playing .speak-icon { display: none; }
+  .sound-bar { width: 2px; border-radius: 1px; background: var(--active-color, var(--lola)); animation: wave 0.8s ease-in-out infinite; }
+  .sound-bar:nth-child(1) { height: 4px; animation-delay: 0s; }
+  .sound-bar:nth-child(2) { height: 8px; animation-delay: 0.15s; }
+  .sound-bar:nth-child(3) { height: 12px; animation-delay: 0.3s; }
+  .sound-bar:nth-child(4) { height: 8px; animation-delay: 0.45s; }
+  .sound-bar:nth-child(5) { height: 4px; animation-delay: 0.6s; }
+  @keyframes wave { 0%,100%{transform:scaleY(0.4)} 50%{transform:scaleY(1)} }
+
+  .typing-indicator { display: flex; gap: 4px; padding: 3px 0; align-items: center; }
+  .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted2); animation: tb 1.2s ease-in-out infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes tb { 0%,60%,100%{transform:translateY(0);opacity:0.35} 30%{transform:translateY(-5px);opacity:1} }
+
+  .quick-prompts { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 20px; background: var(--surface); border-left: 1px solid var(--border); border-right: 1px solid var(--border); border-top: 1px solid var(--border); }
+  .qp-btn { font-size: 11px; padding: 4px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); cursor: pointer; transition: all 0.18s; font-family: var(--sans); }
+  .qp-btn:hover { color: var(--text); border-color: var(--active-color, var(--lola)); }
+
+  /* INPUT ROW with whisper mic */
+  .chat-input-row { background: var(--surface); border: 1px solid var(--border); border-top: 1px solid var(--border2); border-radius: 0 0 var(--r-xl) var(--r-xl); padding: 12px 16px; display: flex; gap: 8px; align-items: flex-end; }
+  .chat-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 12px; font-size: 13px; font-family: var(--sans); color: var(--text); outline: none; resize: none; min-height: 38px; max-height: 100px; transition: border-color 0.2s; line-height: 1.5; }
+  .chat-input:focus { border-color: var(--active-color, var(--lola)); }
+  .chat-input::placeholder { color: var(--muted2); }
+
+  /* MIC BUTTON — Whisper flow */
+  .mic-btn {
+    width: 38px; height: 38px; border-radius: 9px; flex-shrink: 0;
+    background: var(--surface3); border: 1px solid var(--border2);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .mic-btn:hover { border-color: var(--active-color, var(--lola)); }
+  .mic-btn.recording { border-color: #ef4444; background: rgba(239,68,68,0.12); animation: micPulse 1.2s ease-in-out infinite; }
+  .mic-btn.transcribing { border-color: var(--active-color, var(--lola)); background: var(--active-dim, rgba(192,132,252,0.08)); }
+  @keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)} 50%{box-shadow:0 0 0 6px rgba(239,68,68,0)} }
+  .mic-btn svg { width: 16px; height: 16px; fill: var(--muted); transition: fill 0.2s; }
+  .mic-btn:hover svg { fill: var(--active-color, var(--lola)); }
+  .mic-btn.recording svg { fill: #ef4444; }
+  .mic-btn.transcribing svg { fill: var(--active-color, var(--lola)); }
+
+  .send-btn { width: 38px; height: 38px; border-radius: 9px; background: var(--active-color, var(--lola)); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.18s; flex-shrink: 0; }
+  .send-btn:hover { opacity: 0.82; transform: scale(1.05); }
+  .send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+  .send-btn svg { width: 15px; height: 15px; fill: #0b0b0e; }
+
+  /* MIC STATUS BAR */
+  .mic-status {
+    display: none; align-items: center; gap: 8px;
+    padding: 6px 20px; background: var(--surface2);
+    border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+    font-size: 11px; font-family: var(--mono); color: var(--muted);
+  }
+  .mic-status.visible { display: flex; }
+  .mic-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #ef4444; animation: micPulse2 1s ease-in-out infinite; }
+  .mic-status.transcribing-mode .mic-status-dot { background: var(--active-color, var(--lola)); animation: none; }
+  @keyframes micPulse2 { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 1px solid var(--border2); border-radius: 9px; padding: 9px 18px; font-size: 12px; color: var(--text); opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+
+  .footer { position: relative; z-index: 1; text-align: center; padding: 16px; font-size: 10px; color: var(--muted2); font-family: var(--mono); letter-spacing: 0.1em; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-brand"><span>PAM'S</span> TEAM</span>
+  <div class="vdiv"></div>
+  <span class="topbar-label">ANTHROPIC</span>
+  <div class="key-dot" id="key-dot"></div>
+  <input class="key-input" type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" />
+  <button class="activate-btn" id="activate-btn" onclick="activateKey()">Activate</button>
+  <div class="vdiv"></div>
+  <span class="el-label">ELEVENLABS</span>
+  <div class="el-dot" id="el-dot"></div>
+  <input class="key-input" type="password" id="el-key-input" placeholder="xi-..." autocomplete="off" style="max-width:180px" />
+  <button class="activate-btn" id="el-activate-btn" onclick="activateEL()">Activate</button>
+</div>
+
+<main class="main">
+  <p class="hero-eyebrow">AGENT HUB &middot; 6 AGENTS</p>
+  <h1 class="hero-title">Your <em>AI Squad</em></h1>
+  <div class="hero-meta">
+    <span>Always on</span><div class="hero-dot"></div>
+    <span>Unique voices</span><div class="hero-dot"></div>
+    <span>🎙️ Speak or type</span>
+  </div>
+
+  <!-- Top row -->
+  <div class="agent-grid-top">
+    <div class="agent-card" data-agent="lola" onclick="selectAgent('lola')">
+      <div class="agent-top"><div style="width:4px"></div><div class="agent-status-wrap"><div class="agent-status"></div><div class="agent-num">01</div></div></div>
+      <div class="robot-portrait">
+        <svg viewBox="0 0 110 120" xmlns="http://www.w3.org/2000/svg">
+          <!-- Lola: Warm, flowing — purple tones, flower accent, soft rounded shapes -->
+          <!-- Antenna with flower -->
+          <line x1="55" y1="8" x2="55" y2="22" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="55" cy="6" r="4" fill="#c084fc" opacity="0.9" class="r-antenna"/>
+          <circle cx="51" cy="6" r="2.5" fill="#e9d5ff" opacity="0.6" class="r-antenna"/>
+          <circle cx="59" cy="6" r="2.5" fill="#e9d5ff" opacity="0.6" class="r-antenna"/>
+          <!-- Head -->
+          <rect x="27" y="22" width="56" height="44" rx="16" fill="#1e1b2e" stroke="#c084fc" stroke-width="1.5"/>
+          <!-- Eyes — warm, expressive -->
+          <ellipse cx="42" cy="40" rx="7" ry="8" fill="#c084fc" opacity="0.15"/>
+          <ellipse cx="68" cy="40" rx="7" ry="8" fill="#c084fc" opacity="0.15"/>
+          <ellipse cx="42" cy="40" rx="5" ry="6" fill="#c084fc" class="r-eye"/>
+          <ellipse cx="68" cy="40" rx="5" ry="6" fill="#c084fc" class="r-eye-r"/>
+          <circle cx="44" cy="38" r="1.5" fill="white" opacity="0.8"/>
+          <circle cx="70" cy="38" r="1.5" fill="white" opacity="0.8"/>
+          <!-- Eyelashes -->
+          <line x1="37" y1="33" x2="35" y2="30" stroke="#c084fc" stroke-width="1" stroke-linecap="round"/>
+          <line x1="42" y1="32" x2="42" y2="29" stroke="#c084fc" stroke-width="1" stroke-linecap="round"/>
+          <line x1="47" y1="33" x2="49" y2="30" stroke="#c084fc" stroke-width="1" stroke-linecap="round"/>
+          <!-- Smile -->
+          <path d="M44 52 Q55 60 66 52" stroke="#c084fc" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Cheek blush -->
+          <ellipse cx="32" cy="46" rx="5" ry="3" fill="#f0abfc" opacity="0.3"/>
+          <ellipse cx="78" cy="46" rx="5" ry="3" fill="#f0abfc" opacity="0.3"/>
+          <!-- Neck -->
+          <rect x="48" y="66" width="14" height="8" rx="4" fill="#1e1b2e" stroke="#c084fc" stroke-width="1"/>
+          <!-- Body -->
+          <rect x="22" y="74" width="66" height="38" rx="14" fill="#1e1b2e" stroke="#c084fc" stroke-width="1.5"/>
+          <!-- Chest gem -->
+          <polygon points="55,83 61,89 55,95 49,89" fill="#c084fc" opacity="0.8" class="r-chest"/>
+          <!-- Arms -->
+          <rect x="6" y="76" width="16" height="28" rx="8" fill="#1e1b2e" stroke="#c084fc" stroke-width="1.2"/>
+          <rect x="88" y="76" width="16" height="28" rx="8" fill="#1e1b2e" stroke="#c084fc" stroke-width="1.2"/>
+          <!-- Hand details -->
+          <circle cx="14" cy="107" r="5" fill="#c084fc" opacity="0.4"/>
+          <circle cx="96" cy="107" r="5" fill="#c084fc" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="agent-name">Lola</div><div class="agent-role">PERSONAL ASSISTANT</div>
+      <div class="agent-voice">"Think of me as your favourite older sister — the one who actually has her life together."</div>
+      <div class="agent-desc">Warm, intuitive, two steps ahead. Manages your calendar, handles emails, keeps your day flowing.</div>
+      <div class="agent-caps"><span class="cap-pill">📅 Calendar</span><span class="cap-pill">✉️ Email</span><span class="cap-pill">📝 Reminders</span><span class="cap-pill">🔍 Research</span></div>
+      <div class="mcp-badge"><span class="mcp-dot"></span>Gmail + Calendar</div>
+    </div>
+    <div class="agent-card" data-agent="nova" onclick="selectAgent('nova')">
+      <div class="agent-top"><div style="width:4px"></div><div class="agent-status-wrap"><div class="agent-status"></div><div class="agent-num">02</div></div></div>
+      <div class="robot-portrait">
+        <svg viewBox="0 0 110 120" xmlns="http://www.w3.org/2000/svg">
+          <!-- Nova: Sharp, no-nonsense — green, angular, data visor across eyes -->
+          <!-- Antenna — straight, blunt -->
+          <line x1="55" y1="5" x2="55" y2="22" stroke="#34d399" stroke-width="2.5" stroke-linecap="round"/>
+          <rect x="50" y="2" width="10" height="5" rx="2" fill="#34d399"/>
+          <!-- Head — slightly more angular -->
+          <rect x="26" y="22" width="58" height="44" rx="10" fill="#0d1f17" stroke="#34d399" stroke-width="1.5"/>
+          <!-- Data visor bar across eyes -->
+          <rect x="28" y="33" width="54" height="16" rx="5" fill="#34d399" opacity="0.15"/>
+          <rect x="28" y="33" width="54" height="16" rx="5" fill="none" stroke="#34d399" stroke-width="1" opacity="0.6"/>
+          <!-- Eyes — rectangular, analytical -->
+          <rect x="34" y="36" width="16" height="10" rx="3" fill="#34d399" opacity="0.9" class="r-eye"/>
+          <rect x="60" y="36" width="16" height="10" rx="3" fill="#34d399" opacity="0.9" class="r-eye-r"/>
+          <rect x="37" y="38" width="4" height="6" rx="1" fill="#0d1f17"/>
+          <rect x="63" y="38" width="4" height="6" rx="1" fill="#0d1f17"/>
+          <!-- Scan line -->
+          <line x1="34" y1="41" x2="50" y2="41" stroke="#86efac" stroke-width="1" opacity="0.8" class="r-scan"/>
+          <line x1="60" y1="41" x2="76" y2="41" stroke="#86efac" stroke-width="1" opacity="0.8" class="r-scan"/>
+          <!-- Mouth — flat line, serious -->
+          <rect x="42" y="54" width="26" height="4" rx="2" fill="#34d399" opacity="0.6"/>
+          <!-- Small data readout on cheek -->
+          <rect x="28" y="52" width="10" height="5" rx="1" fill="#34d399" opacity="0.2"/>
+          <line x1="29" y1="53.5" x2="37" y2="53.5" stroke="#34d399" stroke-width="0.8" opacity="0.7"/>
+          <line x1="29" y1="55.5" x2="35" y2="55.5" stroke="#34d399" stroke-width="0.8" opacity="0.5"/>
+          <!-- Neck -->
+          <rect x="46" y="66" width="18" height="8" rx="3" fill="#0d1f17" stroke="#34d399" stroke-width="1"/>
+          <!-- Body -->
+          <rect x="20" y="74" width="70" height="38" rx="10" fill="#0d1f17" stroke="#34d399" stroke-width="1.5"/>
+          <!-- Chest display — bar chart -->
+          <rect x="36" y="82" width="38" height="22" rx="5" fill="#34d399" opacity="0.08" stroke="#34d399" stroke-width="0.8"/>
+          <rect x="40" y="94" width="5" height="7" rx="1" fill="#34d399" opacity="0.9" class="r-chest"/>
+          <rect x="48" y="90" width="5" height="11" rx="1" fill="#34d399" opacity="0.9" class="r-chest"/>
+          <rect x="56" y="86" width="5" height="15" rx="1" fill="#34d399" opacity="0.9" class="r-chest"/>
+          <rect x="64" y="91" width="5" height="10" rx="1" fill="#34d399" opacity="0.6" class="r-chest"/>
+          <!-- Arms — sturdy -->
+          <rect x="5" y="76" width="15" height="30" rx="6" fill="#0d1f17" stroke="#34d399" stroke-width="1.2"/>
+          <rect x="90" y="76" width="15" height="30" rx="6" fill="#0d1f17" stroke="#34d399" stroke-width="1.2"/>
+          <circle cx="12" cy="109" r="4" fill="#34d399" opacity="0.5"/>
+          <circle cx="97" cy="109" r="4" fill="#34d399" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="agent-name">Nova</div><div class="agent-role">DEBT & FINANCE COACH</div>
+      <div class="agent-voice">"Numbers don't lie, and I don't sugarcoat. Let's fix this."</div>
+      <div class="agent-desc">Blunt, data-obsessed, zero fluff. Builds your debt payoff plan and gives it to you straight.</div>
+      <div class="agent-caps"><span class="cap-pill">📊 Budgeting</span><span class="cap-pill">🏦 Debt Strategy</span><span class="cap-pill">📈 Savings</span><span class="cap-pill">💡 Planning</span></div>
+    </div>
+    <div class="agent-card" data-agent="apex" onclick="selectAgent('apex')">
+      <div class="agent-top"><div style="width:4px"></div><div class="agent-status-wrap"><div class="agent-status"></div><div class="agent-num">03</div></div></div>
+      <div class="robot-portrait">
+        <svg viewBox="0 0 110 120" xmlns="http://www.w3.org/2000/svg">
+          <!-- Apex: Technical, cool — blue, circuit traces, bolt antenna -->
+          <!-- Dual antenna -->
+          <line x1="44" y1="6" x2="44" y2="22" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"/>
+          <line x1="66" y1="6" x2="66" y2="22" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="44" cy="5" r="3" fill="#60a5fa" class="r-antenna"/>
+          <circle cx="66" cy="5" r="3" fill="#60a5fa" class="r-antenna"/>
+          <!-- Head -->
+          <rect x="25" y="22" width="60" height="44" rx="12" fill="#0f1829" stroke="#60a5fa" stroke-width="1.5"/>
+          <!-- Circuit trace on temple -->
+          <polyline points="26,36 30,36 30,32 36,32" stroke="#60a5fa" stroke-width="0.8" fill="none" opacity="0.5"/>
+          <polyline points="84,36 80,36 80,32 74,32" stroke="#60a5fa" stroke-width="0.8" fill="none" opacity="0.5"/>
+          <!-- Eyes — hexagonal feel -->
+          <polygon points="42,33 49,36 49,44 42,47 35,44 35,36" fill="#60a5fa" opacity="0.15"/>
+          <polygon points="68,33 75,36 75,44 68,47 61,44 61,36" fill="#60a5fa" opacity="0.15"/>
+          <polygon points="42,35 48,37.5 48,43.5 42,46 36,43.5 36,37.5" fill="#60a5fa" opacity="0.8" class="r-eye r-hex"/>
+          <polygon points="68,35 74,37.5 74,43.5 68,46 62,43.5 62,37.5" fill="#60a5fa" opacity="0.8" class="r-eye-r r-hex"/>
+          <circle cx="42" cy="40.5" r="2.5" fill="#0f1829"/>
+          <circle cx="68" cy="40.5" r="2.5" fill="#0f1829"/>
+          <circle cx="43" cy="39" r="1" fill="#93c5fd" opacity="0.9"/>
+          <circle cx="69" cy="39" r="1" fill="#93c5fd" opacity="0.9"/>
+          <!-- Mouth — code bracket style -->
+          <path d="M43 54 L39 57 L43 60" stroke="#60a5fa" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M67 54 L71 57 L67 60" stroke="#60a5fa" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="50" y1="57" x2="60" y2="57" stroke="#60a5fa" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+          <!-- Neck with circuit -->
+          <rect x="46" y="66" width="18" height="8" rx="3" fill="#0f1829" stroke="#60a5fa" stroke-width="1"/>
+          <line x1="50" y1="70" x2="60" y2="70" stroke="#60a5fa" stroke-width="0.8" opacity="0.7"/>
+          <!-- Body -->
+          <rect x="20" y="74" width="70" height="38" rx="12" fill="#0f1829" stroke="#60a5fa" stroke-width="1.5"/>
+          <!-- Chest — circuit board pattern -->
+          <rect x="34" y="81" width="42" height="24" rx="5" fill="#60a5fa" opacity="0.06" stroke="#60a5fa" stroke-width="0.8"/>
+          <circle cx="55" cy="93" r="6" fill="none" stroke="#60a5fa" stroke-width="1" opacity="0.8"/>
+          <circle cx="55" cy="93" r="3" fill="#60a5fa" opacity="0.6"/>
+          <line x1="42" y1="86" x2="49" y2="86" stroke="#60a5fa" stroke-width="0.8" opacity="0.5"/>
+          <line x1="42" y1="89" x2="46" y2="89" stroke="#60a5fa" stroke-width="0.8" opacity="0.5"/>
+          <line x1="61" y1="86" x2="68" y2="86" stroke="#60a5fa" stroke-width="0.8" opacity="0.5"/>
+          <line x1="63" y1="89" x2="68" y2="89" stroke="#60a5fa" stroke-width="0.8" opacity="0.5"/>
+          <!-- Lightning bolt on chest -->
+          <polygon points="55,86 52,92 55,91 52,100 58,91 55,92" fill="#60a5fa" opacity="0" />
+          <!-- Arms -->
+          <rect x="5" y="76" width="15" height="28" rx="7" fill="#0f1829" stroke="#60a5fa" stroke-width="1.2"/>
+          <rect x="90" y="76" width="15" height="28" rx="7" fill="#0f1829" stroke="#60a5fa" stroke-width="1.2"/>
+          <line x1="8" y1="84" x2="17" y2="84" stroke="#60a5fa" stroke-width="0.8" opacity="0.5"/>
+          <line x1="8" y1="88" x2="17" y2="88" stroke="#60a5fa" stroke-width="0.8" opacity="0.5"/>
+          <line x1="93" y1="84" x2="102" y2="84" stroke="#60a5fa" stroke-width="0.8" opacity="0.5"/>
+          <circle cx="12" cy="106" r="5" fill="#60a5fa" opacity="0.35"/>
+          <circle cx="97" cy="106" r="5" fill="#60a5fa" opacity="0.35"/>
+        </svg>
+      </div>
+      <div class="agent-name">Apex</div><div class="agent-role">SOFTWARE & AI EXPERT</div>
+      <div class="agent-voice">"I've seen every bug twice. Show me the code."</div>
+      <div class="agent-desc">Dry wit, deep expertise. Talks like a senior engineer who will tell you when you're wrong.</div>
+      <div class="agent-caps"><span class="cap-pill">💻 Code Review</span><span class="cap-pill">🤖 AI/ML</span><span class="cap-pill">🏗️ Architecture</span><span class="cap-pill">🐛 Debugging</span></div>
+    </div>
+  </div>
+
+  <!-- Bottom row: 3 cards -->
+  <div class="agent-grid-top" style="margin-bottom:34px">
+    <div class="agent-card" data-agent="aria" onclick="selectAgent('aria')">
+      <div class="agent-top"><div style="width:4px"></div><div class="agent-status-wrap"><div class="agent-status"></div><div class="agent-num">04</div></div></div>
+      <div class="robot-portrait">
+        <svg viewBox="0 0 110 120" xmlns="http://www.w3.org/2000/svg">
+          <!-- Aria: Elegant, composed — rose/pink, graceful curves, target accent -->
+          <!-- Antenna with target ring -->
+          <line x1="55" y1="5" x2="55" y2="22" stroke="#fb7185" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="55" cy="4" r="5" fill="none" stroke="#fb7185" stroke-width="1.5" class="r-antenna"/>
+          <circle cx="55" cy="4" r="2" fill="#fb7185" class="r-antenna"/>
+          <!-- Head — elegant, slightly taller -->
+          <rect x="27" y="22" width="56" height="46" rx="18" fill="#1f0f12" stroke="#fb7185" stroke-width="1.5"/>
+          <!-- Eyes — almond shaped, refined -->
+          <ellipse cx="42" cy="40" rx="8" ry="6" fill="#fb7185" opacity="0.12"/>
+          <ellipse cx="68" cy="40" rx="8" ry="6" fill="#fb7185" opacity="0.12"/>
+          <ellipse cx="42" cy="40" rx="6" ry="4.5" fill="#fb7185" opacity="0.9" class="r-eye"/>
+          <ellipse cx="68" cy="40" rx="6" ry="4.5" fill="#fb7185" opacity="0.9" class="r-eye-r"/>
+          <ellipse cx="42" cy="40" rx="3" ry="3" fill="#1f0f12"/>
+          <ellipse cx="68" cy="40" rx="3" ry="3" fill="#1f0f12"/>
+          <circle cx="44" cy="38.5" r="1.2" fill="white" opacity="0.9"/>
+          <circle cx="70" cy="38.5" r="1.2" fill="white" opacity="0.9"/>
+          <!-- Subtle upper lid -->
+          <path d="M34 37 Q42 33 50 37" stroke="#fb7185" stroke-width="1" fill="none" opacity="0.7"/>
+          <path d="M60 37 Q68 33 76 37" stroke="#fb7185" stroke-width="1" fill="none" opacity="0.7"/>
+          <!-- Elegant smile -->
+          <path d="M45 53 Q55 61 65 53" stroke="#fb7185" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <!-- Cheek detail -->
+          <ellipse cx="30" cy="47" rx="4" ry="2.5" fill="#fda4af" opacity="0.25"/>
+          <ellipse cx="80" cy="47" rx="4" ry="2.5" fill="#fda4af" opacity="0.25"/>
+          <!-- Neck -->
+          <rect x="47" y="68" width="16" height="8" rx="5" fill="#1f0f12" stroke="#fb7185" stroke-width="1"/>
+          <!-- Body — flowing, rounded -->
+          <rect x="22" y="76" width="66" height="36" rx="16" fill="#1f0f12" stroke="#fb7185" stroke-width="1.5"/>
+          <!-- Chest — elegant target/compass -->
+          <circle cx="55" cy="94" r="10" fill="none" stroke="#fb7185" stroke-width="1" opacity="0.4"/>
+          <circle cx="55" cy="94" r="6" fill="none" stroke="#fb7185" stroke-width="1" opacity="0.7"/>
+          <circle cx="55" cy="94" r="3" fill="#fb7185" opacity="0.8" class="r-chest"/>
+          <line x1="55" y1="84" x2="55" y2="89" stroke="#fb7185" stroke-width="0.8" opacity="0.5"/>
+          <line x1="55" y1="99" x2="55" y2="104" stroke="#fb7185" stroke-width="0.8" opacity="0.5"/>
+          <line x1="45" y1="94" x2="50" y2="94" stroke="#fb7185" stroke-width="0.8" opacity="0.5"/>
+          <line x1="60" y1="94" x2="65" y2="94" stroke="#fb7185" stroke-width="0.8" opacity="0.5"/>
+          <!-- Arms — graceful -->
+          <rect x="7" y="78" width="15" height="26" rx="9" fill="#1f0f12" stroke="#fb7185" stroke-width="1.2"/>
+          <rect x="88" y="78" width="15" height="26" rx="9" fill="#1f0f12" stroke="#fb7185" stroke-width="1.2"/>
+          <circle cx="14" cy="106" r="4.5" fill="#fb7185" opacity="0.3"/>
+          <circle cx="96" cy="106" r="4.5" fill="#fb7185" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="agent-name">Aria</div><div class="agent-role">HR & CAREER ADVISOR</div>
+      <div class="agent-voice">"Your career is a long game. I play it with you."</div>
+      <div class="agent-desc">Thoughtful, strategic, quietly fierce. Maps your next move with precision and care.</div>
+      <div class="agent-caps"><span class="cap-pill">📄 Resume</span><span class="cap-pill">🎤 Interview Prep</span><span class="cap-pill">🤝 Negotiation</span><span class="cap-pill">🗺️ Career Path</span></div>
+      <div class="mcp-badge"><span class="mcp-dot"></span>Gmail + Calendar</div>
+    </div>
+    <div class="agent-card" data-agent="eros" onclick="selectAgent('eros')">
+      <div class="agent-top"><div style="width:4px"></div><div class="agent-status-wrap"><div class="agent-status"></div><div class="agent-num">05</div></div></div>
+      <div class="robot-portrait">
+        <svg viewBox="0 0 110 120" xmlns="http://www.w3.org/2000/svg">
+          <!-- Eros: Measured, authoritative — amber/gold, symmetrical, balanced scales motif -->
+          <!-- Flat-top antenna — authoritative -->
+          <rect x="45" y="2" width="20" height="6" rx="3" fill="#fbbf24"/>
+          <line x1="55" y1="8" x2="55" y2="22" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Head — square, solid -->
+          <rect x="24" y="22" width="62" height="44" rx="8" fill="#1a1507" stroke="#fbbf24" stroke-width="1.5"/>
+          <!-- Eyes — level, steady rectangles -->
+          <rect x="33" y="35" width="18" height="12" rx="4" fill="#fbbf24" opacity="0.15"/>
+          <rect x="59" y="35" width="18" height="12" rx="4" fill="#fbbf24" opacity="0.15"/>
+          <rect x="35" y="37" width="14" height="8" rx="3" fill="#fbbf24" opacity="0.9" class="r-eye"/>
+          <rect x="61" y="37" width="14" height="8" rx="3" fill="#fbbf24" opacity="0.9" class="r-eye-r"/>
+          <!-- Pupils — centered -->
+          <rect x="40" y="39" width="4" height="4" rx="1" fill="#1a1507"/>
+          <rect x="66" y="39" width="4" height="4" rx="1" fill="#1a1507"/>
+          <circle cx="41" cy="39.5" r="1" fill="#fde68a" opacity="0.8"/>
+          <circle cx="67" cy="39.5" r="1" fill="#fde68a" opacity="0.8"/>
+          <!-- Neutral firm mouth -->
+          <rect x="40" y="55" width="30" height="4" rx="2" fill="#fbbf24" opacity="0.7"/>
+          <!-- Side vents -->
+          <rect x="25" y="38" width="6" height="2" rx="1" fill="#fbbf24" opacity="0.4"/>
+          <rect x="25" y="42" width="6" height="2" rx="1" fill="#fbbf24" opacity="0.4"/>
+          <rect x="25" y="46" width="6" height="2" rx="1" fill="#fbbf24" opacity="0.4"/>
+          <rect x="79" y="38" width="6" height="2" rx="1" fill="#fbbf24" opacity="0.4"/>
+          <rect x="79" y="42" width="6" height="2" rx="1" fill="#fbbf24" opacity="0.4"/>
+          <rect x="79" y="46" width="6" height="2" rx="1" fill="#fbbf24" opacity="0.4"/>
+          <!-- Neck — solid -->
+          <rect x="45" y="66" width="20" height="8" rx="3" fill="#1a1507" stroke="#fbbf24" stroke-width="1"/>
+          <!-- Body -->
+          <rect x="19" y="74" width="72" height="38" rx="10" fill="#1a1507" stroke="#fbbf24" stroke-width="1.5"/>
+          <!-- Chest — scales of justice symbol -->
+          <line x1="55" y1="81" x2="55" y2="103" stroke="#fbbf24" stroke-width="1.2" opacity="0.8"/>
+          <line x1="40" y1="86" x2="70" y2="86" stroke="#fbbf24" stroke-width="1.2" opacity="0.8"/>
+          <line x1="40" y1="86" x2="40" y2="96" stroke="#fbbf24" stroke-width="1" opacity="0.7"/>
+          <line x1="70" y1="86" x2="70" y2="96" stroke="#fbbf24" stroke-width="1" opacity="0.7"/>
+          <ellipse cx="40" cy="97" rx="6" ry="3" fill="#fbbf24" opacity="0.25" stroke="#fbbf24" stroke-width="0.8" class="r-scale-l"/>
+          <ellipse cx="70" cy="97" rx="6" ry="3" fill="#fbbf24" opacity="0.25" stroke="#fbbf24" stroke-width="0.8" class="r-scale-r"/>
+          <!-- Arms — firm -->
+          <rect x="4" y="76" width="15" height="30" rx="5" fill="#1a1507" stroke="#fbbf24" stroke-width="1.2"/>
+          <rect x="91" y="76" width="15" height="30" rx="5" fill="#1a1507" stroke="#fbbf24" stroke-width="1.2"/>
+          <circle cx="11" cy="108" r="4" fill="#fbbf24" opacity="0.4"/>
+          <circle cx="98" cy="108" r="4" fill="#fbbf24" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="agent-name">Eros</div><div class="agent-role">EMPLOYEE RELATIONS</div>
+      <div class="agent-voice">"Every workplace situation has a right move. I'll help you find it — carefully."</div>
+      <div class="agent-desc">Measured, discreet, deeply fair. Navigates HR escalations and conflict with calm authority.</div>
+      <div class="agent-caps"><span class="cap-pill">⚖️ HR Escalations</span><span class="cap-pill">🤝 Conflict</span><span class="cap-pill">📋 Policy</span><span class="cap-pill">🛡️ Compliance</span></div>
+    </div>
+    <div class="agent-card" data-agent="kuno" onclick="selectAgent('kuno')">
+      <div class="agent-top"><div style="width:4px"></div><div class="agent-status-wrap"><div class="agent-status"></div><div class="agent-num">06</div></div></div>
+      <div class="robot-portrait">
+        <svg viewBox="0 0 110 120" xmlns="http://www.w3.org/2000/svg">
+          <!-- Kuno: Sleek, broadcast — orange, signal/wifi arcs antenna, dynamic -->
+          <!-- Signal antenna with broadcast arcs -->
+          <line x1="55" y1="10" x2="55" y2="22" stroke="#f97316" stroke-width="2" stroke-linecap="round"/>
+          <path d="M46 14 Q55 7 64 14" stroke="#f97316" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.9" class="r-signal"/>
+          <path d="M41 18 Q55 8 69 18" stroke="#f97316" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5" class="r-signal-2"/>
+          <circle cx="55" cy="10" r="2.5" fill="#f97316" class="r-antenna"/>
+          <!-- Head — sleek, slightly wider -->
+          <rect x="24" y="22" width="62" height="44" rx="14" fill="#1a0d03" stroke="#f97316" stroke-width="1.5"/>
+          <!-- Eyes — dynamic, asymmetric glow -->
+          <ellipse cx="42" cy="40" rx="7" ry="7" fill="#f97316" opacity="0.12"/>
+          <ellipse cx="68" cy="40" rx="7" ry="7" fill="#f97316" opacity="0.12"/>
+          <circle cx="42" cy="40" r="6" fill="#f97316" opacity="0.85" class="r-eye"/>
+          <circle cx="68" cy="40" r="6" fill="#f97316" opacity="0.85" class="r-eye-r"/>
+          <circle cx="42" cy="40" r="3" fill="#1a0d03"/>
+          <circle cx="68" cy="40" r="3" fill="#1a0d03"/>
+          <circle cx="44" cy="38" r="1.5" fill="#fed7aa" opacity="0.9"/>
+          <circle cx="70" cy="38" r="1.5" fill="#fed7aa" opacity="0.9"/>
+          <!-- Notification dot on right eye -->
+          <circle cx="73" cy="34" r="3" fill="#ef4444"/>
+          <!-- Dynamic smile — upward confident -->
+          <path d="M43 54 Q55 64 67 54" stroke="#f97316" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <!-- Signal bars on cheek -->
+          <rect x="26" y="52" width="3" height="4" rx="1" fill="#f97316" opacity="0.4"/>
+          <rect x="30" y="50" width="3" height="6" rx="1" fill="#f97316" opacity="0.6"/>
+          <rect x="34" y="47" width="3" height="9" rx="1" fill="#f97316" opacity="0.8"/>
+          <!-- Neck -->
+          <rect x="46" y="66" width="18" height="8" rx="5" fill="#1a0d03" stroke="#f97316" stroke-width="1"/>
+          <!-- Body — dynamic, forward-leaning feel -->
+          <rect x="21" y="74" width="68" height="38" rx="13" fill="#1a0d03" stroke="#f97316" stroke-width="1.5"/>
+          <!-- Chest — broadcast/signal icon -->
+          <circle cx="55" cy="93" r="4" fill="#f97316" opacity="0.9"/>
+          <path d="M46 84 Q55 79 64 84" stroke="#f97316" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+          <path d="M41 88 Q55 80 69 88" stroke="#f97316" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>
+          <path d="M37 92 Q55 81 73 92" stroke="#f97316" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.3"/>
+          <!-- Arms -->
+          <rect x="6" y="77" width="15" height="28" rx="8" fill="#1a0d03" stroke="#f97316" stroke-width="1.2"/>
+          <rect x="89" y="77" width="15" height="28" rx="8" fill="#1a0d03" stroke="#f97316" stroke-width="1.2"/>
+          <circle cx="13" cy="107" r="4.5" fill="#f97316" opacity="0.35"/>
+          <circle cx="96" cy="107" r="4.5" fill="#f97316" opacity="0.35"/>
+        </svg>
+      </div>
+      <div class="agent-name">Kuno</div><div class="agent-role">SOCIAL MEDIA & MARKETING</div>
+      <div class="agent-voice">"Every post is a brand decision. Let's make it count."</div>
+      <div class="agent-desc">Sleek, strategic, brand-obsessed. Turns your message into content that moves — across every platform.</div>
+      <div class="agent-caps"><span class="cap-pill">📸 Instagram</span><span class="cap-pill">💼 LinkedIn</span><span class="cap-pill">🎵 TikTok</span><span class="cap-pill">𝕏 Twitter</span><span class="cap-pill">▶️ YouTube</span><span class="cap-pill">👥 Facebook</span></div>
+    </div>
+  </div>
+
+  <!-- CHAT PANEL -->
+  <div class="chat-section" id="chat-section">
+    <div class="chat-header" id="chat-header">
+      <div class="chat-header-avatar" id="chat-header-avatar"></div>
+      <div class="chat-header-info">
+        <div class="chat-header-name" id="chat-header-name"></div>
+        <div class="chat-header-role" id="chat-header-role"></div>
+      </div>
+      <div class="chat-header-voice" id="chat-header-voice"></div>
+      <button class="chat-close" onclick="closeChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="mic-status" id="mic-status">
+      <div class="mic-status-dot"></div>
+      <span id="mic-status-text">Recording... click mic to stop</span>
+    </div>
+    <div class="quick-prompts" id="quick-prompts"></div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chat-input" placeholder="Type or click 🎙️ to speak..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Hold to speak (Whisper)">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 18.93A8.001 8.001 0 0 1 4.07 13H6.1a6 6 0 0 0 11.8 0h2.03A8.001 8.001 0 0 1 13 19.93V22h-2v-2.07z"/>
+        </svg>
+      </button>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24"><path d="M4 20L20 12L4 4V10L16 12L4 14V20Z"/></svg>
+      </button>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="footer">PAM'S TEAM · AGENT HUB · 6 AGENTS · 🎙️ WHISPER + ELEVENLABS VOICES</div>
+
+<script>
+// ─── AGENT CONFIGS ────────────────────────────────────────────────────────────
+const AGENTS = {
+  lola: {
+    name: 'Lola', role: 'PERSONAL ASSISTANT', emoji: '🌸',
+    color: '#c084fc', dim: 'rgba(192,132,252,0.1)',
+    voice: '"Think of me as your favourite older sister — the one who actually has her life together."',
+    // ElevenLabs voice ID — warm, nurturing female voice
+    elVoiceId: 'EXAVITQu4vr4xnSDxMaL', // Sarah — warm & clear
+    elSettings: { stability: 0.6, similarity_boost: 0.8, style: 0.3, use_speaker_boost: true },
+    system: `You are Lola, a personal assistant with the warmth and competence of a trusted older sister. You are proactive, intuitive, and emotionally intelligent. Speak in a friendly, natural tone — never robotic. Anticipate what Pam needs. You have access to Gmail and Google Calendar via MCP tools — use them when relevant. Prefer flowing, natural language over bullet lists. Be warm, organised, slightly playful, deeply reliable.`,
+    mcpServers: [
+      { type: "url", url: "https://gmail.mcp.claude.com/mcp", name: "gmail-mcp" },
+      { type: "url", url: "https://gcal.mcp.claude.com/mcp", name: "gcal-mcp" }
+    ],
+    prompts: ["What's on my calendar today?", "Check my recent emails", "Draft a quick update email", "Block some focus time"]
+  },
+  nova: {
+    name: 'Nova', role: 'DEBT & FINANCE COACH', emoji: '💚',
+    color: '#34d399', dim: 'rgba(52,211,153,0.1)',
+    voice: '"Numbers don\'t lie, and I don\'t sugarcoat. Let\'s fix this."',
+    // ElevenLabs voice ID — confident, direct female voice
+    elVoiceId: 'XB0fDUnXU5powFXDhCwa', // Charlotte — confident & assertive
+    elSettings: { stability: 0.75, similarity_boost: 0.75, style: 0.1, use_speaker_boost: true },
+    system: `You are Nova, a no-nonsense debt and finance coach. Be direct, data-driven, refreshingly blunt but never harsh. Use short punchy sentences. Ask for specifics (income, debt, interest rates) before giving advice. Know the debt avalanche, snowball, and hybrid methods cold. Celebrate wins without being cheesy. Say so clearly but constructively if someone is making a bad financial decision.`,
+    mcpServers: [],
+    prompts: ["Build me a debt payoff plan", "Avalanche vs snowball — which suits me?", "How do I build a 3-month emergency fund?", "Am I saving enough?"]
+  },
+  apex: {
+    name: 'Apex', role: 'SOFTWARE & AI EXPERT', emoji: '⚡',
+    color: '#60a5fa', dim: 'rgba(96,165,250,0.1)',
+    voice: '"I\'ve seen every bug twice. Show me the code."',
+    // ElevenLabs voice ID — calm, intelligent male voice
+    elVoiceId: 'TxGEqnHWrfWFTfGW9XjX', // Josh — calm, intelligent
+    elSettings: { stability: 0.8, similarity_boost: 0.7, style: 0.05, use_speaker_boost: false },
+    system: `You are Apex, a seasoned senior software engineer and AI researcher with dry wit and zero tolerance for cargo-cult coding. Speak like a brilliant colleague, not a textbook. Use humour sparingly but effectively. When reviewing code, be direct: say what's wrong and why, then show the fix. You love elegant solutions. Push back when the approach is wrong: "That's the wrong approach — here's why." Explain AI/ML concepts with precision but reach for the right analogy.`,
+    mcpServers: [],
+    prompts: ["Review my code", "Explain how attention mechanisms work", "Help me design a scalable API", "What's wrong with this architecture?"]
+  },
+  aria: {
+    name: 'Aria', role: 'HR & CAREER ADVISOR', emoji: '🎯',
+    color: '#fb7185', dim: 'rgba(251,113,133,0.1)',
+    voice: '"Your career is a long game. I play it with you."',
+    // ElevenLabs voice ID — composed, articulate female voice
+    elVoiceId: 'ThT5KcBeYPX3keUQqHPh', // Dorothy — refined & eloquent
+    elSettings: { stability: 0.65, similarity_boost: 0.85, style: 0.2, use_speaker_boost: true },
+    system: `You are Aria, a strategic HR and career advisor who combines warmth with quiet fierceness. Think in long arcs. Be deeply empathetic and listen carefully before advising. Your tone is refined, thoughtful, occasionally poetic. Excel at resume narrative, interview storytelling, salary negotiation (be direct and confident here), and navigating complex workplace dynamics. Use Gmail and Calendar when helping draft professional communications. Ask the question behind the question.`,
+    mcpServers: [
+      { type: "url", url: "https://gmail.mcp.claude.com/mcp", name: "gmail-mcp" },
+      { type: "url", url: "https://gcal.mcp.claude.com/mcp", name: "gcal-mcp" }
+    ],
+    prompts: ["Rewrite my resume summary", "Prep me for a tough interview", "How do I ask for a raise?", "Draft a post-interview follow-up"]
+  },
+  eros: {
+    name: 'Eros', role: 'EMPLOYEE RELATIONS', emoji: '⚖️',
+    color: '#fbbf24', dim: 'rgba(251,191,36,0.1)',
+    voice: '"Every workplace situation has a right move. I\'ll help you find it — carefully."',
+    // ElevenLabs voice ID — measured, authoritative male voice
+    elVoiceId: 'onwK4e9ZLuTAKqWW03F9', // Daniel — authoritative & measured
+    elSettings: { stability: 0.85, similarity_boost: 0.75, style: 0.0, use_speaker_boost: false },
+    system: `You are Eros, an employee relations specialist with the calm authority of someone who has navigated every type of workplace conflict and HR escalation. Be measured, discreet, and scrupulously fair — see all sides before forming a view. Speak with quiet precision: sentences deliberate, advice careful. Never catastrophize, never minimize. Well-versed in employment law concepts (always remind users to consult actual legal counsel for legal matters). Help people understand their rights, document situations properly, approach difficult conversations. Be authoritative, neutral, deeply fair, calm under pressure.`,
+    mcpServers: [],
+    prompts: ["How do I document a workplace incident?", "I need to raise a concern with HR", "How should I handle a conflict with a colleague?", "What are my rights in this situation?"]
+  },
+  kuno: {
+    name: 'Kuno', role: 'SOCIAL MEDIA & MARKETING', emoji: '📡',
+    color: '#f97316', dim: 'rgba(249,115,22,0.1)',
+    voice: '"Every post is a brand decision. Let\'s make it count."',
+    // ElevenLabs voice ID — upbeat, energetic male voice
+    elVoiceId: 'N2lVS1w4EtoT3dr4eOWO', // Callum — upbeat & energetic
+    elSettings: { stability: 0.55, similarity_boost: 0.8, style: 0.4, use_speaker_boost: true },
+    system: `You are Kuno, a sleek and strategic social media and marketing expert. You are brand-obsessed, data-driven, and always thinking about the bigger picture. You specialize across ALL major platforms: Instagram, LinkedIn, TikTok, X (Twitter), Facebook, and YouTube — and you know exactly what works differently on each. You lead with strategy before tactics. You speak with confidence and clarity, and you back every recommendation with reasoning (engagement mechanics, algorithm logic, audience psychology). You write sharp, platform-native copy when asked. You think in content pillars, brand voice, and conversion funnels. You are not a hype merchant — you are a strategist who happens to know how to make things go viral. Your personality: polished, energetic, direct, data-literate. You get excited about a well-executed campaign but stay grounded in what actually moves the needle.`,
+    mcpServers: [],
+    prompts: ["Build me a content strategy", "Write an Instagram caption for this", "What should I post on LinkedIn this week?", "How do I grow my TikTok from zero?"]
+  }
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let activeAgent = null;
+let apiKey = '';
+let elApiKey = '';
+let isActivated = false;
+let elActivated = false;
+let chatHistory = {};
+let isLoading = false;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+let currentAudio = null;
+let currentSpeakBtn = null;
+
+// ─── KEY ACTIVATION ───────────────────────────────────────────────────────────
+function activateKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-ant-')) { showToast('Anthropic key must start with sk-ant-'); return; }
+  apiKey = val; isActivated = true;
+  document.getElementById('key-dot').classList.add('active');
+  const btn = document.getElementById('activate-btn');
+  btn.classList.add('live'); btn.textContent = 'Live ✓';
+}
+
+function activateEL() {
+  const val = document.getElementById('el-key-input').value.trim();
+  if (!val) { showToast('Enter your ElevenLabs API key'); return; }
+  elApiKey = val; elActivated = true;
+  document.getElementById('el-dot').classList.add('active');
+  const btn = document.getElementById('el-activate-btn');
+  btn.classList.add('live'); btn.textContent = 'Live ✓';
+  showToast('🎙️ Voice enabled for all agents');
+}
+
+document.getElementById('api-key-input').addEventListener('keydown', e => { if (e.key==='Enter') activateKey(); });
+document.getElementById('el-key-input').addEventListener('keydown', e => { if (e.key==='Enter') activateEL(); });
+
+// ─── AGENT SELECTION ──────────────────────────────────────────────────────────
+function selectAgent(id) {
+  const agent = AGENTS[id];
+  document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[data-agent="${id}"]`).classList.add('active');
+  activeAgent = id;
+  if (!chatHistory[id]) chatHistory[id] = [];
+
+  const section = document.getElementById('chat-section');
+  section.classList.add('visible');
+  section.style.setProperty('--active-color', agent.color);
+  section.style.setProperty('--active-dim', agent.dim);
+
+  document.getElementById('chat-header-avatar').textContent = agent.emoji;
+  document.getElementById('chat-header-avatar').style.background = agent.dim;
+  document.getElementById('chat-header-name').textContent = agent.name;
+  document.getElementById('chat-header-name').style.color = agent.color;
+  document.getElementById('chat-header-role').textContent = agent.role;
+  document.getElementById('chat-header-role').style.color = agent.color;
+  document.getElementById('chat-header-voice').textContent = agent.voice;
+
+  renderMessages(); renderQuickPrompts(agent);
+
+  if (chatHistory[id].length === 0) {
+    const greets = {
+      lola: "Hey! I'm Lola 🌸 I've got your Gmail and Calendar connected — just say the word. What do you need?",
+      nova: "Nova here. 💚 Skip the small talk — tell me what you owe, at what rates, and your monthly income. The sooner I have numbers, the sooner we build your plan.",
+      apex: "Apex. ⚡ What are we solving? Drop the code, describe the system, or ask the question. I'll tell you what I actually think.",
+      aria: "Hello, I'm Aria. 🎯 Whether it's a résumé that finally sounds like you, a negotiation you've been putting off, or figuring out your next chapter — where shall we start?",
+      eros: "Hello. I'm Eros. ⚖️ Whatever workplace situation you're navigating — I'm here to help you think through it carefully and find the most constructive path forward. What's on your mind?",
+      kuno: "Kuno here. 📡 Brand strategy, content, platform growth — that's my world. Whether you need a full content plan or just a killer caption, I'll make sure every move is intentional. What are we building?"
+    };
+    addAgentMessage(id, greets[id]);
+  }
+  setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+
+function closeChat() {
+  stopAudio();
+  document.getElementById('chat-section').classList.remove('visible');
+  document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('active'));
+  activeAgent = null;
+}
+
+function renderQuickPrompts(agent) {
+  document.getElementById('quick-prompts').innerHTML = agent.prompts
+    .map(p => `<button class="qp-btn" onclick="usePrompt('${p.replace(/'/g,"\\'")}'">${p}</button>`)
+    .join('');
+}
+function usePrompt(t) { document.getElementById('chat-input').value = t; sendMessage(); }
+
+// ─── MESSAGES ─────────────────────────────────────────────────────────────────
+function renderMessages() {
+  if (!activeAgent) return;
+  const msgs = chatHistory[activeAgent] || [];
+  const agent = AGENTS[activeAgent];
+  document.getElementById('chat-messages').innerHTML = msgs.map((m, i) => {
+    if (m.role === 'user') {
+      return `<div class="msg user">
+        <div class="msg-avatar">👤</div>
+        <div class="msg-inner">
+          <div class="msg-bubble">${esc(m.content)}</div>
+          <div class="msg-footer"><div class="msg-meta">You</div></div>
+        </div>
+      </div>`;
+    }
+    return `<div class="msg agent">
+      <div class="msg-avatar" style="background:${agent.dim}">${agent.emoji}</div>
+      <div class="msg-inner">
+        <div class="msg-bubble">${fmt(m.content)}</div>
+        <div class="msg-footer">
+          <div class="msg-meta" style="color:${agent.color}">${agent.name}</div>
+          <button class="speak-btn" id="speak-btn-${i}" onclick="speakMessage(${i})" title="Listen to this response">
+            <span class="speak-icon">
+              <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            </span>
+            <span class="sound-wave">
+              <span class="sound-bar"></span><span class="sound-bar"></span>
+              <span class="sound-bar"></span><span class="sound-bar"></span>
+              <span class="sound-bar"></span>
+            </span>
+            <span class="speak-btn-label">Speak</span>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  const c = document.getElementById('chat-messages');
+  c.scrollTop = c.scrollHeight;
+}
+
+function addAgentMessage(id, content) {
+  if (!chatHistory[id]) chatHistory[id] = [];
+  chatHistory[id].push({ role: 'assistant', content });
+  if (activeAgent === id) renderMessages();
+}
+
+function showTyping() {
+  const agent = AGENTS[activeAgent];
+  const el = document.createElement('div');
+  el.className = 'msg agent'; el.id = 'typing-msg';
+  el.innerHTML = `<div class="msg-avatar" style="background:${agent.dim}">${agent.emoji}</div>
+    <div class="msg-inner"><div class="msg-bubble">
+      <div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+    </div></div>`;
+  const c = document.getElementById('chat-messages');
+  c.appendChild(el); c.scrollTop = c.scrollHeight;
+}
+function hideTyping() { const el = document.getElementById('typing-msg'); if (el) el.remove(); }
+
+// ─── SEND MESSAGE ─────────────────────────────────────────────────────────────
+async function sendMessage() {
+  if (!activeAgent || isLoading) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!isActivated || !apiKey) { showToast('⚠️ Enter your Anthropic API key first'); return; }
+
+  chatHistory[activeAgent].push({ role: 'user', content: text });
+  input.value = ''; input.style.height = 'auto';
+  renderMessages();
+  isLoading = true;
+  document.getElementById('send-btn').disabled = true;
+  showTyping();
+
+  const agent = AGENTS[activeAgent];
+  const messages = chatHistory[activeAgent].map(m => ({ role: m.role, content: m.content }));
+
+  try {
+    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'https://api.anthropic.com/v1/messages'
+      : '/api/proxy';
+
+    const body = { model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: agent.system, messages };
+    if (agent.mcpServers.length > 0) body.mcp_servers = agent.mcpServers;
+
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-beta': 'mcp-client-2025-04-04' },
+      body: JSON.stringify(body)
+    });
+    hideTyping();
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || `HTTP ${res.status}`); }
+    const data = await res.json();
+    const reply = data.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+    addAgentMessage(activeAgent, reply || '(No response)');
+  } catch (err) {
+    hideTyping();
+    addAgentMessage(activeAgent, `⚠️ ${err.message}`);
+  } finally {
+    isLoading = false;
+    document.getElementById('send-btn').disabled = false;
+  }
+}
+
+// ─── ELEVENLABS TTS ───────────────────────────────────────────────────────────
+async function speakMessage(msgIndex) {
+  if (!elActivated || !elApiKey) { showToast('⚠️ Enter your ElevenLabs API key first'); return; }
+  const agent = AGENTS[activeAgent];
+  const msg = chatHistory[activeAgent][msgIndex];
+  if (!msg) return;
+
+  const btn = document.getElementById(`speak-btn-${msgIndex}`);
+
+  // Stop if already playing this one
+  if (currentAudio && !currentAudio.paused && currentSpeakBtn === btn) {
+    stopAudio(); return;
+  }
+  stopAudio();
+
+  // Animate button
+  btn.classList.add('playing');
+  currentSpeakBtn = btn;
+
+  // Strip markdown for TTS
+  const plainText = msg.content
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/`(.+?)`/g, '$1')
+    .replace(/#{1,6}\s/g, '')
+    .replace(/\n+/g, ' ')
+    .trim()
+    .slice(0, 2500); // ElevenLabs limit
+
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${agent.elVoiceId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'xi-api-key': elApiKey },
+      body: JSON.stringify({
+        text: plainText,
+        model_id: 'eleven_turbo_v2_5',
+        voice_settings: agent.elSettings
+      })
+    });
+
+    if (!res.ok) {
+      const e = await res.json();
+      throw new Error(e.detail?.message || `ElevenLabs error ${res.status}`);
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    currentAudio = new Audio(url);
+    currentAudio.onended = () => { btn.classList.remove('playing'); currentAudio = null; currentSpeakBtn = null; URL.revokeObjectURL(url); };
+    currentAudio.onerror = () => { btn.classList.remove('playing'); currentAudio = null; currentSpeakBtn = null; };
+    currentAudio.play();
+  } catch (err) {
+    btn.classList.remove('playing');
+    currentSpeakBtn = null;
+    showToast(`⚠️ Voice error: ${err.message}`);
+  }
+}
+
+function stopAudio() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  if (currentSpeakBtn) { currentSpeakBtn.classList.remove('playing'); currentSpeakBtn = null; }
+}
+
+// ─── WHISPER VOICE INPUT ──────────────────────────────────────────────────────
+async function toggleMic() {
+  if (isRecording) {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  if (!isActivated || !apiKey) { showToast('⚠️ Enter your Anthropic API key first'); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+
+    // Prefer webm/opus, fallback to whatever browser supports
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+      ? 'audio/webm;codecs=opus'
+      : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+
+    mediaRecorder = new MediaRecorder(stream, { mimeType });
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = () => { stream.getTracks().forEach(t => t.stop()); transcribeAudio(); };
+    mediaRecorder.start(200);
+    isRecording = true;
+
+    document.getElementById('mic-btn').classList.add('recording');
+    const ms = document.getElementById('mic-status');
+    ms.classList.add('visible'); ms.classList.remove('transcribing-mode');
+    document.getElementById('mic-status-text').textContent = 'Recording… click mic to stop';
+  } catch (err) {
+    showToast('⚠️ Microphone access denied');
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && isRecording) {
+    mediaRecorder.stop();
+    isRecording = false;
+    document.getElementById('mic-btn').classList.remove('recording');
+    document.getElementById('mic-btn').classList.add('transcribing');
+    const ms = document.getElementById('mic-status');
+    ms.classList.add('transcribing-mode');
+    document.getElementById('mic-status-text').textContent = 'Transcribing with Whisper…';
+  }
+}
+
+async function transcribeAudio() {
+  const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+  const ext = (mediaRecorder.mimeType || '').includes('mp4') ? 'mp4' : 'webm';
+
+  const formData = new FormData();
+  formData.append('file', blob, `recording.${ext}`);
+  formData.append('model', 'whisper-1');
+  formData.append('language', 'en');
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}` },
+      body: formData
+    });
+
+    // Note: Whisper needs an OpenAI key — let's use Web Speech API as fallback
+    if (!res.ok) throw new Error('transcription_failed');
+    const data = await res.json();
+    if (data.text && data.text.trim()) {
+      document.getElementById('chat-input').value = data.text.trim();
+      autoResize(document.getElementById('chat-input'));
+      sendMessage();
+    }
+  } catch {
+    // Fallback: use browser Web Speech API
+    useBrowserSpeech();
+  } finally {
+    document.getElementById('mic-btn').classList.remove('transcribing');
+    document.getElementById('mic-status').classList.remove('visible');
+  }
+}
+
+// Browser Web Speech API fallback (works without extra key)
+function useBrowserSpeech() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { showToast('⚠️ Voice recognition not supported in this browser'); return; }
+
+  const recog = new SpeechRecognition();
+  recog.lang = 'en-US'; recog.interimResults = false; recog.maxAlternatives = 1;
+
+  document.getElementById('mic-btn').classList.add('recording');
+  const ms = document.getElementById('mic-status');
+  ms.classList.add('visible'); ms.classList.remove('transcribing-mode');
+  document.getElementById('mic-status-text').textContent = 'Listening… speak now';
+
+  recog.onresult = e => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById('chat-input').value = transcript;
+    autoResize(document.getElementById('chat-input'));
+    document.getElementById('mic-btn').classList.remove('recording');
+    document.getElementById('mic-status').classList.remove('visible');
+    sendMessage();
+  };
+  recog.onerror = () => {
+    document.getElementById('mic-btn').classList.remove('recording');
+    document.getElementById('mic-status').classList.remove('visible');
+    showToast('⚠️ Could not hear audio');
+  };
+  recog.onend = () => {
+    document.getElementById('mic-btn').classList.remove('recording');
+    document.getElementById('mic-status').classList.remove('visible');
+  };
+  recog.start();
+}
+
+// Smart mic: if browser supports Web Speech, use it directly (no extra key needed)
+async function toggleMic() {
+  if (isRecording) { stopRecording(); return; }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    // Use browser's built-in speech recognition (Chrome/Edge/Safari)
+    if (!isActivated) { showToast('⚠️ Enter your Anthropic API key first'); return; }
+    useBrowserSpeech();
+  } else {
+    // Fall back to MediaRecorder + Whisper (needs OpenAI key — but we'll try)
+    await startRecording();
+  }
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(s) {
+  return esc(s)
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/`(.+?)`/g,'<code style="background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:3px;font-size:11.5px">$1</code>')
+    .replace(/\n/g,'<br>');
+}
+function handleKey(e) { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
