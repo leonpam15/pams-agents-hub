@@ -783,10 +783,31 @@ let currentAudio = null;
 let currentSpeakBtn = null;
 
 // ─── KEY ACTIVATION ───────────────────────────────────────────────────────────
+// Load saved keys on startup
+window.addEventListener('DOMContentLoaded', () => {
+  const savedKey = localStorage.getItem('anthropic_key');
+  const savedEl = localStorage.getItem('el_key');
+  if (savedKey) {
+    document.getElementById('api-key-input').value = savedKey;
+    apiKey = savedKey; isActivated = true;
+    document.getElementById('key-dot').classList.add('active');
+    document.getElementById('activate-btn').classList.add('live');
+    document.getElementById('activate-btn').textContent = 'Live ✓';
+  }
+  if (savedEl) {
+    document.getElementById('el-key-input').value = savedEl;
+    elApiKey = savedEl; elActivated = true;
+    document.getElementById('el-dot').classList.add('active');
+    document.getElementById('el-activate-btn').classList.add('live');
+    document.getElementById('el-activate-btn').textContent = 'Live ✓';
+  }
+});
+
 function activateKey() {
   const val = document.getElementById('api-key-input').value.trim();
   if (!val.startsWith('sk-ant-')) { showToast('Anthropic key must start with sk-ant-'); return; }
   apiKey = val; isActivated = true;
+  localStorage.setItem('anthropic_key', val);
   document.getElementById('key-dot').classList.add('active');
   const btn = document.getElementById('activate-btn');
   btn.classList.add('live'); btn.textContent = 'Live ✓';
@@ -796,6 +817,7 @@ function activateEL() {
   const val = document.getElementById('el-key-input').value.trim();
   if (!val) { showToast('Enter your ElevenLabs API key'); return; }
   elApiKey = val; elActivated = true;
+  localStorage.setItem('el_key', val);
   document.getElementById('el-dot').classList.add('active');
   const btn = document.getElementById('el-activate-btn');
   btn.classList.add('live'); btn.textContent = 'Live ✓';
@@ -934,16 +956,20 @@ async function sendMessage() {
   const messages = chatHistory[activeAgent].map(m => ({ role: m.role, content: m.content }));
 
   try {
-    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'https://api.anthropic.com/v1/messages'
-      : '/api/proxy';
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_URL = isLocal ? 'https://api.anthropic.com/v1/messages' : '/api/proxy';
 
     const body = { model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: agent.system, messages };
     if (agent.mcpServers.length > 0) body.mcp_servers = agent.mcpServers;
 
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-beta': 'mcp-client-2025-04-04' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'mcp-client-2025-04-04'
+      },
       body: JSON.stringify(body)
     });
     hideTyping();
