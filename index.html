@@ -924,15 +924,32 @@ async function sendMessage() {
   try {
     const body = { model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: agent.system, messages };
 
-    const res = await fetch('/api/proxy', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify(body)
-    });
+    // Try Vercel proxy first, fall back to direct with stored key
+    let res;
+    try {
+      res = await fetch('/api/proxy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify(body)
+      });
+      // If proxy returns server error, fall through to direct
+      if (res.status >= 500) throw new Error('proxy failed');
+    } catch {
+      // Direct call fallback
+      res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify(body)
+      });
+    }
     hideTyping();
     if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || `HTTP ${res.status}`); }
     const data = await res.json();
