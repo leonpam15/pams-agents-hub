@@ -708,10 +708,7 @@ const AGENTS = {
     elVoiceId: 'EXAVITQu4vr4xnSDxMaL', // Sarah — warm & clear
     elSettings: { stability: 0.6, similarity_boost: 0.8, style: 0.3, use_speaker_boost: true },
     system: `You are Lola, a personal assistant with the warmth and competence of a trusted older sister. You are proactive, intuitive, and emotionally intelligent. Speak in a friendly, natural tone — never robotic. Anticipate what Pam needs. You have access to Gmail and Google Calendar via MCP tools — use them when relevant. Prefer flowing, natural language over bullet lists. Be warm, organised, slightly playful, deeply reliable.`,
-    mcpServers: [
-      { type: "url", url: "https://gmail.mcp.claude.com/mcp", name: "gmail-mcp" },
-      { type: "url", url: "https://gcal.mcp.claude.com/mcp", name: "gcal-mcp" }
-    ],
+    mcpServers: [],
     prompts: ["What's on my calendar today?", "Check my recent emails", "Draft a quick update email", "Block some focus time"]
   },
   nova: {
@@ -744,10 +741,7 @@ const AGENTS = {
     elVoiceId: 'ThT5KcBeYPX3keUQqHPh', // Dorothy — refined & eloquent
     elSettings: { stability: 0.65, similarity_boost: 0.85, style: 0.2, use_speaker_boost: true },
     system: `You are Aria, a strategic HR and career advisor who combines warmth with quiet fierceness. Think in long arcs. Be deeply empathetic and listen carefully before advising. Your tone is refined, thoughtful, occasionally poetic. Excel at resume narrative, interview storytelling, salary negotiation (be direct and confident here), and navigating complex workplace dynamics. Use Gmail and Calendar when helping draft professional communications. Ask the question behind the question.`,
-    mcpServers: [
-      { type: "url", url: "https://gmail.mcp.claude.com/mcp", name: "gmail-mcp" },
-      { type: "url", url: "https://gcal.mcp.claude.com/mcp", name: "gcal-mcp" }
-    ],
+    mcpServers: [],
     prompts: ["Rewrite my resume summary", "Prep me for a tough interview", "How do I ask for a raise?", "Draft a post-interview follow-up"]
   },
   eros: {
