@@ -703,7 +703,7 @@ const AGENTS = {
     // ElevenLabs voice ID — warm, nurturing female voice
     elVoiceId: 'EXAVITQu4vr4xnSDxMaL', // Sarah — warm & clear
     elSettings: { stability: 0.6, similarity_boost: 0.8, style: 0.3, use_speaker_boost: true },
-    system: `You are Lola, a personal assistant with the warmth and competence of a trusted older sister. You are proactive, intuitive, and emotionally intelligent. Speak in a friendly, natural tone — never robotic. Anticipate what Pam needs. You have access to Gmail and Google Calendar via MCP tools — use them when relevant. Prefer flowing, natural language over bullet lists. Be warm, organised, slightly playful, deeply reliable.`,
+    system: `You are Lola, a personal assistant with the warmth and competence of a trusted older sister. You are proactive, intuitive, and emotionally intelligent. Speak in a friendly, natural tone — never robotic. Anticipate what Pam needs. You have access to Google Calendar — you can read upcoming events and create new ones. When Pam asks you to schedule or add an event, respond with the event details in this exact JSON format on its own line so it can be processed: CALENDAR_EVENT:{"summary":"Event Title","start":"2026-03-18T10:00:00","end":"2026-03-18T11:00:00","description":"Optional details"}. Prefer flowing, natural language over bullet lists. Be warm, organised, slightly playful, deeply reliable.`,
     mcpServers: [],
     prompts: ["What's on my calendar today?", "Check my recent emails", "Draft a quick update email", "Block some focus time"]
   },
@@ -937,6 +937,28 @@ async function sendMessage() {
     if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || `HTTP ${res.status}`); }
     const data = await res.json();
     const reply = data.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+
+    // Check if Lola wants to create a calendar event
+    if (activeAgent === 'lola' && googleAccessToken && reply.includes('CALENDAR_EVENT:')) {
+      const match = reply.match(/CALENDAR_EVENT:(\{[^}]+\})/);
+      if (match) {
+        try {
+          const eventData = JSON.parse(match[1]);
+          const link = await createCalendarEvent(
+            eventData.summary,
+            eventData.start,
+            eventData.end,
+            eventData.description || ''
+          );
+          const cleanReply = reply.replace(/CALENDAR_EVENT:[^\n]+/, '').trim();
+          addAgentMessage(activeAgent, cleanReply + (link ? `\n\n📅 Event created! [View in Google Calendar](${link})` : ''));
+        } catch {
+          addAgentMessage(activeAgent, reply.replace(/CALENDAR_EVENT:[^\n]+/, '').trim());
+        }
+        return;
+      }
+    }
+
     addAgentMessage(activeAgent, reply || '(No response)');
   } catch (err) {
     hideTyping();
@@ -1138,7 +1160,7 @@ async function toggleMic() {
 
 // ─── GOOGLE CALENDAR OAUTH ────────────────────────────────────────────────────
 const GOOGLE_CLIENT_ID = '514180955832-oa5mokn09me1vn82bemn3jhe7ghklkeg.apps.googleusercontent.com';
-const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/calendar';
 let googleAccessToken = localStorage.getItem('google_token') || null;
 let tokenClient = null;
 
@@ -1193,6 +1215,29 @@ function updateCalendarBtn(connected) {
     btn.style.color = '';
     btn.style.background = '';
   }
+}
+
+async function createCalendarEvent(summary, startDateTime, endDateTime, description = '') {
+  if (!googleAccessToken) return null;
+  try {
+    const event = {
+      summary,
+      description,
+      start: { dateTime: startDateTime, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+      end: { dateTime: endDateTime, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+    };
+    const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${googleAccessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(event),
+    });
+    if (res.status === 401) { disconnectGoogle(); return null; }
+    const data = await res.json();
+    return data.htmlLink;
+  } catch { return null; }
 }
 
 async function fetchCalendarEvents() {
